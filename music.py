@@ -1,4 +1,3 @@
-
 import math
 
 import matplotlib.pyplot as plt
@@ -76,6 +75,6 @@ if(__name__ == '__main__'):
         'g-sharp-3','c-4','f-sharp-4',
         'g-sharp-3','c-sharp-4','e-4',
         'g-sharp-3','c-sharp-4','d-sharp-4',
-        'g-sharp-3','c-4','d-sharp-4',
+        'f-sharp-3','c-4','d-sharp-4',
         ])
     
