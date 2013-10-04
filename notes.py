@@ -1,4 +1,4 @@
-#create the 'generic' names for each note. each note goes by multiple names, this structure keeps track of the different names
+#each note goes by multiple names, this structure keeps track of the different names, in the correct order
 note_sequence = [
     ('c',       'c-natural', 'b-sharp'),
     ('c-sharp', 'd-flat'),
