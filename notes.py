@@ -1,4 +1,3 @@
-
 def create_note_map():
     middle_a = 440
     note_ratio = 2 ** (float(1) / float(12))
@@ -30,3 +29,19 @@ def create_note_map():
             note_map["%s-%d"%(note_name,octave_num)] = middle_a * (note_ratio ** (n - 57))
             
     return note_map 
+
+def get_key(note_name, key_type):
+    
+    #first we need to find the index of this note
+    note_index = 0
+    
+    #find this key's position on the circle of fifths
+    #keys progress up and down from C using a circle of fifths. so the "base" key is at C, 
+    #then we go up one perfect fifth to G, thne up one perfect fifth to D. this is equivalent to solving 
+    #"note_index congruent to perfect_fith_interval * wheel_position (mod 12)" for wheel_position
+    
+    #the solution to that formula is simply "note_index * perfect_fifth_interval (mod 12)"
+    wheel_position = (note_index * 7) % 12
+    
+    
+    
