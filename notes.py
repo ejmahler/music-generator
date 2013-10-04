@@ -63,5 +63,53 @@ def get_key(note_name, key_type):
         
     #wheel_position now contains an integer from -7 to +7 representing its position on the wheel of fifths
     
+    #set up the initial note configuration assuming a key of c major or a minor
+    if(key_type == 'major'):
+        tone_modifier = 1
+        key_notes = [
+            note_index, #c
+            (note_index + 2)%12,#d
+            (note_index + 4)%12,#e
+            (note_index + 5)%12,#f
+            (note_index + 7)%12,#g
+            (note_index + 9)%12,#a
+            (note_index + 11)%12,#b
+        ]
+    elif(key_type == 'minor'):
+        key_notes = [
+            note_index, #a
+            (note_index + 2)%12,#b
+            (note_index + 3)%12,#c
+            (note_index + 5)%12,#d
+            (note_index + 7)%12,#e
+            (note_index + 8)%12,#f
+            (note_index + 10)%12,#g
+        ]
     
+    #if the wheel position is positive we will be raising notes by one half tone, 
+    #and if its negative we'll be decreasting notes by one half tone
+    if(wheel_position > 0):
+        tone_modifier = 1
+    elif(wheel_position < 0):
+        tone_modifier = = -1
+    else:
+        tone_modifier = 0
+        
+    #loop from 1 to wheel_position, inclusive
+    for i in xrange(1, abs(wheel_position) + 1):
+        current_note = (7 * i * tone_modifier) % 12
+        
+        #if this is a sharp key, go 2 semitones back from current_key, and increase that by one semitone
+        if(tone_modifier > 0):
+            modified_index = key_notes.find((current_note - 2) % 12)
+        
+        #if this is a sharp key, go a perfect fifth back from current_key, and increase that by one semitone
+        elif(tone_modifier > 0):
+            modified_index = key_notes.find((current_note - 7) % 12)
+            
+        key_notes[modified_index] = (key_notes[modified_index] + tone_modifier) % 12
+        
+    #key_notes now contains the indexes of the notes that will be used in this key, with the base note at key_notes[0]
     
+        
+        
