@@ -103,9 +103,9 @@ def get_key(note_name, key_type):
         if(tone_modifier > 0):
             modified_index = key_notes.find((current_note - 2) % 12)
         
-        #if this is a sharp key, go a perfect fifth back from current_key, and increase that by one semitone
+        #if this is a sharp key, go 6 semitones back from current_key, and increase that by one semitone
         elif(tone_modifier > 0):
-            modified_index = key_notes.find((current_note - 7) % 12)
+            modified_index = key_notes.find((current_note - 6) % 12)
             
         key_notes[modified_index] = (key_notes[modified_index] + tone_modifier) % 12
         
