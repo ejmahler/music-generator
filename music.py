@@ -60,7 +60,7 @@ def create_note_fade():
     
 
 if(__name__ == '__main__'):
-    write_music([
+    '''write_music([
         'g-sharp-3','c-sharp-4','e-4',
         'g-sharp-3','c-sharp-4','e-4',
         'g-sharp-3','c-sharp-4','e-4',
@@ -76,5 +76,6 @@ if(__name__ == '__main__'):
         'g-sharp-3','c-sharp-4','e-4',
         'g-sharp-3','c-sharp-4','d-sharp-4',
         'f-sharp-3','c-4','d-sharp-4',
-        ])
+        ])'''
+    print notes.get_key('g','major')
     

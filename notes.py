@@ -30,12 +30,12 @@ def create_note_map():
             
     return note_map 
 
-def get_key(note_name, key_type):
+def get_key(key_name, key_type):
     
     #set up the major key indexes
     note_index_map = {'major':{}}
     
-    for i, name_list in note_sequence:
+    for i, name_list in enumerate(note_sequence):
         for note_name in name_list:
             note_index_map['major'][note_name] = i
             
@@ -43,7 +43,7 @@ def get_key(note_name, key_type):
     note_index_map['minor'] = {name:index + 3 for name, index in note_index_map['major'].iteritems()}
     
     #first we need to find the index of this note
-    note_index = note_index_map[key_type][note_name]
+    note_index = note_index_map[key_type][key_name]
     
     #find this key's position on the circle of fifths
     #keys progress up and down from C using a circle of fifths. so the "base" key is at C, 
@@ -58,7 +58,7 @@ def get_key(note_name, key_type):
         wheel_position -= 12
     
     #the keys with index 5 6 and 7 can be both flat or sharp - only make it flay if the key name has "flat" in it
-    elif(wheel_position >= 5 and 'flat' in note_name):
+    elif(wheel_position >= 5 and 'flat' in key_name):
         wheel_position -= 12
         
     #wheel_position now contains an integer from -7 to +7 representing its position on the wheel of fifths
@@ -86,30 +86,7 @@ def get_key(note_name, key_type):
             (note_index + 10)%12,#g
         ]
     
-    #if the wheel position is positive we will be raising notes by one half tone, 
-    #and if its negative we'll be decreasting notes by one half tone
-    if(wheel_position > 0):
-        tone_modifier = 1
-    elif(wheel_position < 0):
-        tone_modifier = = -1
-    else:
-        tone_modifier = 0
-        
-    #loop from 1 to wheel_position, inclusive
-    for i in xrange(1, abs(wheel_position) + 1):
-        current_note = (7 * i * tone_modifier) % 12
-        
-        #if this is a sharp key, go 2 semitones back from current_key, and increase that by one semitone
-        if(tone_modifier > 0):
-            modified_index = key_notes.find((current_note - 2) % 12)
-        
-        #if this is a sharp key, go 6 semitones back from current_key, and increase that by one semitone
-        elif(tone_modifier > 0):
-            modified_index = key_notes.find((current_note - 6) % 12)
-            
-        key_notes[modified_index] = (key_notes[modified_index] + tone_modifier) % 12
-        
     #key_notes now contains the indexes of the notes that will be used in this key, with the base note at key_notes[0]
-    
+    return key_notes
         
         
