@@ -5,7 +5,9 @@ import matplotlib.pyplot as plt
 import numpy
 from scipy.io.wavfile import write
 
+import keys
 import notes
+from notes import natural, sharp, flat
 
 note_map = notes.create_note_map()
 
@@ -52,22 +54,24 @@ def create_note_fade():
     
 
 if(__name__ == '__main__'):
-    '''write_music([
-        'g-sharp3','c-sharp4','e4',
-        'g-sharp3','c-sharp4','e4',
-        'g-sharp3','c-sharp4','e4',
-        'g-sharp3','c-sharp4','e4',
+    
+    key = keys.get_key('C#','minor')
+    
+    write_music([
+        key[7 * 4 + 4], key[7 * 5 + 0], key[7 * 5 + 2],
+        key[7 * 4 + 4], key[7 * 5 + 0], key[7 * 5 + 2],
+        key[7 * 4 + 4], key[7 * 5 + 0], key[7 * 5 + 2],
+        key[7 * 4 + 4], key[7 * 5 + 0], key[7 * 5 + 2],
         
-        'a3','c-sharp4','e4',
-        'a3','c-sharp4','e4',
+        key[7 * 4 + 5], key[7 * 5 + 0], key[7 * 5 + 2],
+        key[7 * 4 + 5], key[7 * 5 + 0], key[7 * 5 + 2],
         
-        'a3','d4','f-sharp4',
-        'a3','d4','f-sharp4',
+        key[7 * 4 + 5], natural(key[7 * 5 + 1]), key[7 * 5 + 3],
+        key[7 * 4 + 5], natural(key[7 * 5 + 1]), key[7 * 5 + 3],
         
-        'g-sharp3','c4','f-sharp4',
-        'g-sharp3','c-sharp4','e4',
-        'g-sharp3','c-sharp4','d-sharp4',
-        'f-sharp3','c4','d-sharp4',
-        ])'''
-    pprint.pprint( notes.get_key('c-sharp','minor'))
+        key[7 * 4 + 4], sharp(key[7 * 4 + 6]), key[7 * 5 + 3],
+        key[7 * 4 + 4], key[7 * 5 + 0], key[7 * 5 + 2],
+        key[7 * 4 + 4], key[7 * 5 + 0], key[7 * 5 + 1],
+        key[7 * 4 + 3], sharp(key[7 * 4 + 6]), key[7 * 5 + 1],
+        ])
     

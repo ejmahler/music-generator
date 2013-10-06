@@ -1,19 +1,30 @@
+
+import re
+
+note_regex = re.compile(r'(?P<note_name>[A-G][#b]?)(?P<octave_number>-?\d+)')
+
 #each note goes by multiple names, this structure keeps track of the different names, in the correct order
-note_sequence = [
-    ('c',       'c-natural', 'b-sharp'),
-    ('c-sharp', 'd-flat'),
-    ('d',       'd-natural'),
-    ('d-sharp', 'e-flat'),
-    ('e',       'e-natural','f-flat'),
-    ('f',       'f-natural','e-sharp'),
-    ('f-sharp', 'g-flat'),
-    ('g',       'g-natural'),
-    ('g-sharp', 'a-flat'),
-    ('a',       'a-natural'),
-    ('a-sharp', 'b-flat'),
-    ('b',       'b-natural', 'c-flat'),
+note_aliases = [
+    {'natural':'C', 'sharp':'B#'                },
+    {               'sharp':'C#',   'flat':'Db' },
+    {'natural':'D'                              },
+    {               'sharp':'D#',   'flat':'Eb' },
+    {'natural':'E',                 'flat':'Fb' },
+    {'natural':'F', 'sharp':'E#'                },
+    {               'sharp':'F#',   'flat':'Gb' },
+    {'natural':'G'                              },
+    {               'sharp':'G#',   'flat':'Ab' },
+    {'natural':'A'                              },
+    {               'sharp':'A#',   'flat':'Bb' },
+    {'natural':'B',                 'flat':'Cb' },
     ]
 
+note_index_map = {}
+for i, name_dict in enumerate(note_aliases):
+    for note_name in name_dict.itervalues():
+        note_index_map[note_name] = i
+        
+        
 def create_note_map():
     middle_a = 440
     note_ratio = 2 ** (float(1) / float(12))
@@ -24,187 +35,104 @@ def create_note_map():
         octave_num = n / 12
         note_num = n % 12
         
-        for note_name in note_sequence[note_num]:
+        for note_name in note_aliases[note_num].itervalues():
+            
+            formatted_note = format_note(note_name,octave_num)
+            
             #compute the frequency of this note relative to middle A (ie 440)
-            note_map["%s%d"%(note_name,octave_num)] = middle_a * (note_ratio ** (n - 57))
+            note_map[formatted_note] = middle_a * (note_ratio ** (n - 57))
             
-    return note_map 
+    return note_map
 
 
-
-
-
-def get_key(key_name, key_type):
+def flat(note_name):
+    new_alias, new_octave = _make_flat(*_parse_note(note_name))
+    return format_note(new_alias,new_octave)
     
-    #set up the major key indexes. this isn't an index through all octaves - it's just the index of notes
-    #on asingle octave, with c natural being 0 and b natural being 11
-    note_index_map = {}
     
-    for i, name_list in enumerate(note_sequence):
-        for note_name in name_list:
-            note_index_map[note_name] = i
-    
-    #first we need to find the index of this note
-    base_note_index = note_index_map[key_name]
-    
-    #find the position on the wheel of fifths, relative to c major/a minor
-    wheel_position = get_wheel_position(base_note_index, key_name, key_type)
-    
-    #find the set of notes that get sharpened or flattened
-    modified_notes = get_modified_notes(wheel_position)
-    
-    #find the ordered list of notes in this key, starting with the base note for the key
-    key_notes = get_key_notes(base_note_index, key_type)
-    
-    #all we have are indexes, and only for a single octave - compute note names for all the octaves
-    return get_full_note_list(key_notes, modified_notes, wheel_position)
+def sharp(note_name):
+    new_alias, new_octave = _make_sharp(*_parse_note(note_name))
+    return format_note(new_alias,new_octave)
 
 
-
-
-
-
+def natural(note_name):
+    note_index, note_alias, octave_num = _parse_note(note_name)
     
-
-def get_wheel_position(note_index, key_name, key_type):
-    
-    #the key index is different from the base note index if we're in a minor key
-    if(key_type == 'minor'):
-        key_index = (note_index + 3)%12
+    if('#' in note_alias):
+        new_alias, new_octave = _make_flat(note_index, note_alias, octave_num)
+    elif('b' in note_alias):
+        new_alias, new_octave = _make_sharp(note_index, note_alias, octave_num)
     else:
-        key_index = note_index
+        new_alias, new_octave = note_alias, octave_num
         
+    return format_note(new_alias,new_octave)
     
-     #find this key's position on the circle of fifths
-    #keys progress up and down from C using a circle of fifths. so the "base" key is at C, 
-    #then we go up one perfect fifth to G, thne up one perfect fifth to D. this is equivalent to solving 
-    #"key_index congruent to perfect_fith_interval * wheel_position (mod 12)" for wheel_position
     
-    #the solution to that formula is simply "key_index * perfect_fifth_interval (mod 12)"
-    wheel_position = (key_index * 7) % 12
-    
-    #for the keys that involve flat notes, we will represent this with negative numbers
-    if(wheel_position >= 8):
-        wheel_position -= 12
-    
-    #the keys with index 5 6 and 7 can be both flat or sharp - only make it flay if the key name has "flat" in it
-    elif(wheel_position >= 5 and 'flat' in key_name):
-        wheel_position -= 12
-        
-    return wheel_position
-
-        
-def get_key_notes(note_index, key_type):
-    #set up the initial note configuration assuming a key of c major or a minor
-    if(key_type == 'major'):
-        key_notes = [
-            note_index, #c
-            (note_index + 2)%12,#d
-            (note_index + 4)%12,#e
-            (note_index + 5)%12,#f
-            (note_index + 7)%12,#g
-            (note_index + 9)%12,#a
-            (note_index + 11)%12,#b
-        ]
-    elif(key_type == 'minor'):
-        key_notes = [
-            note_index, #a
-            (note_index + 2)%12,#b
-            (note_index + 3)%12,#c
-            (note_index + 5)%12,#d
-            (note_index + 7)%12,#e
-            (note_index + 8)%12,#f
-            (note_index + 10)%12,#g
-        ]
-        
-    
-    #key_notes now contains something similar to [8, 10, 11, 1, 3, 4, 6]. we want to convert this to [-4, -2, -1, 1, 3, 4, 6]
-    #we do this by subtracting 12 from each element until we find one that is smaller than the previous
-    previous = -13
-    for i in xrange(len(key_notes)):
-        modified = key_notes[i] - 12
-        if(modified < previous):
-            break
-        previous = key_notes[i] = modified
-    
-    return key_notes
+def format_note(note_alias, octave_num):
+    return "%s%d"%(note_alias,octave_num)
 
 
-def get_modified_notes(wheel_position):
-    #if the wheel position is positive we will be raising notes by one half tone, 
-    #and if its negative we'll be decreasting notes by one half tone
-    if(wheel_position > 0):
-        tone_modifier = 1
-    elif(wheel_position < 0):
-        tone_modifier = -1
+
+#takes in a note with an octave, and returns the note's alias index, its alias, and its octave number
+def _parse_note(note_name):
+    match = note_regex.match(note_name)
+    if(match is None):
+        raise ValueError("Invalid note name")
+    
+    note_alias = match.group('note_name')
+    octave_num = int(match.group('octave_number'))
+    
+    return note_index_map[note_alias], note_alias, octave_num
+
+
+
+def _make_flat(note_index, note_alias, octave_num):
+    new_note_index = note_index - 1
+    new_octave_num = octave_num
+        
+    #check if we've dropped into the next octave
+    if(new_note_index < 0):
+        new_note_index += 12
+        new_octave_num -= 1
+    
+    #i'm not fancy enough for double flats and shit like that, so here are the rules:
+    
+    #if it's a sharp, just go one semitone down and use the natural alias
+    #if it's natural or flat, then go one semitone down, and if that note has a 'flat' alias, use it, otherwise just use the natural alias
+    if(note_alias.endswith('#')):
+        new_note_alias = note_aliases[new_note_index]['natural']
     else:
-        tone_modifier = 0
-        
-    #loop from 1 to wheel_position, inclusive
-    modified_notes = set()
-    for i in xrange(1, abs(wheel_position) + 1):
-        current_note = (7 * i * tone_modifier) % 12
-        
-        #if this is a sharp key, go 2 semitones back from current_key, and increase that by one semitone
-        if(tone_modifier > 0):
-            modified_note = (current_note - 2 + tone_modifier) % 12
-        
-        #if this is a sharp key, go 6 semitones back from current_key, and increase that by one semitone
-        elif(tone_modifier < 0):
-            modified_note = (current_note - 6 + tone_modifier) % 12
+        if('flat' in note_aliases[new_note_index]):
+            new_note_alias = note_aliases[new_note_index]['flat']
+        else:
+            new_note_alias = note_aliases[new_note_index]['natural']
             
-        modified_notes.add(modified_note)
-        
-    return modified_notes
+    return new_note_alias, new_octave_num
 
-    
-def get_full_note_list(key_notes, modified_notes, wheel_position):
-    
-    if(wheel_position > 0):
-        modified_suffix = "sharp"
-    else:
-        modified_suffix = "flat"
-    
-    #loop through octaves 0 to 9 and build the full list of notes, including their names and octaves
-    #for c major, all the note indexes will be negative, meaning octave 9 won't be represented at all
-    #but in general we're creating 9 full octaves
-    note_name_list = []
-    for octave_num in xrange(0, 10):
+
+
+def _make_sharp(note_index, note_alias, octave_num):
+    new_note_index = note_index + 1
+    new_octave_num = octave_num
         
-        for note_num in key_notes:
+    #check if we've risen into the next octave
+    if(new_note_index >= 12):
+        new_note_index -= 12
+        new_octave_num += 1
+    
+    #i'm not fancy enough for double sharps and shit like that, so here are the rules:
+    
+    #if it's a flat, just go one semitone down and use the natural alias
+    #if it's natural or sharp, then go one semitone down, and if that note has a 'sharp' alias, use it, otherwise just use the natural alias
+    if(note_alias.endswith('b')):
+        new_note_alias = note_aliases[new_note_index]['natural']
+    else:
+        if('sharp' in note_aliases[new_note_index]):
+            new_note_alias = note_aliases[new_note_index]['sharp']
+        else:
+            new_note_alias = note_aliases[new_note_index]['natural']
             
-            #if the note number is negative we actually want to put this note in the previous octave
-            if(note_num < 0):
-                current_octave = octave_num - 1
-            else:
-                current_octave = octave_num
-                
-            current_note_index = note_num % 12
-            
-            #find out the name for this note
-            
-            #if this note was modified, we want to use its "special" name like a-sharp or w/e
-            if(current_note_index in modified_notes):
-                
-                #this is a modified note, ie on a piano it would probably be a black key (but not always!)
-                #we want to represent the name of the note with "sharp" if this is a sharp key and "flat" if it is a flat key
-                note_name = None
-                for note_name in note_sequence[current_note_index]:
-                    if(note_name.endswith(modified_suffix)):
-                        break
-                    
-                assert note_name is not None, "Note {0} does not have a {1} name, but this is a {1} key".format(current_note_index, modified_suffix)
-                
-            else:
-                #this is not a modified note, ie on a piano it would be a white key, so just use the name that doesn't say "natural" or "flat"
-                note_name = None
-                for note_name in note_sequence[current_note_index]:
-                    if('-' not in note_name):
-                        break
-                    
-                assert note_name is not None, "Note {0} does not have a short name, but it is a non-sharp-or-flat note".format(current_note_index)
-                
-            #we have the note name and octave name! add this note to the note_name_list
-            note_name_list.append('%s%d'%(note_name, current_octave))
-            
-    return note_name_list
+    return new_note_alias, new_octave_num
+
+
+
