@@ -57,7 +57,7 @@ if(__name__ == '__main__'):
     
     key = keys.get_key('C#','minor')
     
-    write_music([
+    part1 = [
         key[7 * 4 + 4], key[7 * 5 + 0], key[7 * 5 + 2],
         key[7 * 4 + 4], key[7 * 5 + 0], key[7 * 5 + 2],
         key[7 * 4 + 4], key[7 * 5 + 0], key[7 * 5 + 2],
@@ -73,5 +73,27 @@ if(__name__ == '__main__'):
         key[7 * 4 + 4], key[7 * 5 + 0], key[7 * 5 + 2],
         key[7 * 4 + 4], key[7 * 5 + 0], key[7 * 5 + 1],
         key[7 * 4 + 3], sharp(key[7 * 4 + 6]), key[7 * 5 + 1],
-        ])
+        ]
+    
+    key = keys.get_key('G','major')
+    
+    part2 = [
+        key[7 * 4 + 4], key[7 * 5 + 0], key[7 * 5 + 2],
+        key[7 * 4 + 4], key[7 * 5 + 0], key[7 * 5 + 2],
+        key[7 * 4 + 4], key[7 * 5 + 0], key[7 * 5 + 2],
+        key[7 * 4 + 4], key[7 * 5 + 0], key[7 * 5 + 2],
+        
+        key[7 * 4 + 5], key[7 * 5 + 0], key[7 * 5 + 2],
+        key[7 * 4 + 5], key[7 * 5 + 0], key[7 * 5 + 2],
+        
+        key[7 * 4 + 5], natural(key[7 * 5 + 1]), key[7 * 5 + 3],
+        key[7 * 4 + 5], natural(key[7 * 5 + 1]), key[7 * 5 + 3],
+        
+        key[7 * 4 + 4], sharp(key[7 * 4 + 6]), key[7 * 5 + 3],
+        key[7 * 4 + 4], key[7 * 5 + 0], key[7 * 5 + 2],
+        key[7 * 4 + 4], key[7 * 5 + 0], key[7 * 5 + 1],
+        key[7 * 4 + 3], sharp(key[7 * 4 + 6]), key[7 * 5 + 1],
+        ]
+    
+    write_music(part1 + part2)
     
