@@ -20,19 +20,24 @@ def create_note_map():
     
     #compute the frequencies for each note
     note_map = {}
-    for n in xrange(12*9):
+    for n in xrange(-11,12*9):
         octave_num = n / 12
         note_num = n % 12
         
         for note_name in note_sequence[note_num]:
             #compute the frequency of this note relative to middle A (ie 440)
-            note_map["%s-%d"%(note_name,octave_num)] = middle_a * (note_ratio ** (n - 57))
+            note_map["%s%d"%(note_name,octave_num)] = middle_a * (note_ratio ** (n - 57))
             
     return note_map 
 
+
+
+
+
 def get_key(key_name, key_type):
     
-    #set up the major key indexes
+    #set up the major key indexes. this isn't an index through all octaves - it's just the index of notes
+    #on asingle octave, with c natural being 0 and b natural being 11
     note_index_map = {}
     
     for i, name_list in enumerate(note_sequence):
@@ -40,17 +45,26 @@ def get_key(key_name, key_type):
             note_index_map[note_name] = i
     
     #first we need to find the index of this note
-    note_index = note_index_map[key_name]
+    base_note_index = note_index_map[key_name]
     
-    wheel_position = get_wheel_position(note_index, key_name, key_type)
+    #find the position on the wheel of fifths, relative to c major/a minor
+    wheel_position = get_wheel_position(base_note_index, key_name, key_type)
     
+    #find the set of notes that get sharpened or flattened
     modified_notes = get_modified_notes(wheel_position)
     
-    key_notes = get_key_notes(note_index, key_type)
+    #find the ordered list of notes in this key, starting with the base note for the key
+    key_notes = get_key_notes(base_note_index, key_type)
     
+    #all we have are indexes, and only for a single octave - compute note names for all the octaves
+    return get_full_note_list(key_notes, modified_notes, wheel_position)
+
+
+
+
+
+
     
-    #key_notes now contains the indexes of the notes that will be used in this key, with the base note at key_notes[0]
-    return key_notes
 
 def get_wheel_position(note_index, key_name, key_type):
     
@@ -78,6 +92,7 @@ def get_wheel_position(note_index, key_name, key_type):
         wheel_position -= 12
         
     return wheel_position
+
         
 def get_key_notes(note_index, key_type):
     #set up the initial note configuration assuming a key of c major or a minor
@@ -101,7 +116,19 @@ def get_key_notes(note_index, key_type):
             (note_index + 8)%12,#f
             (note_index + 10)%12,#g
         ]
+        
+    
+    #key_notes now contains something similar to [8, 10, 11, 1, 3, 4, 6]. we want to convert this to [-4, -2, -1, 1, 3, 4, 6]
+    #we do this by subtracting 12 from each element until we find one that is smaller than the previous
+    previous = -13
+    for i in xrange(len(key_notes)):
+        modified = key_notes[i] - 12
+        if(modified < previous):
+            break
+        previous = key_notes[i] = modified
+    
     return key_notes
+
 
 def get_modified_notes(wheel_position):
     #if the wheel position is positive we will be raising notes by one half tone, 
@@ -129,5 +156,55 @@ def get_modified_notes(wheel_position):
         modified_notes.add(modified_note)
         
     return modified_notes
+
+    
+def get_full_note_list(key_notes, modified_notes, wheel_position):
+    
+    if(wheel_position > 0):
+        modified_suffix = "sharp"
+    else:
+        modified_suffix = "flat"
+    
+    #loop through octaves 0 to 9 and build the full list of notes, including their names and octaves
+    #for c major, all the note indexes will be negative, meaning octave 9 won't be represented at all
+    #but in general we're creating 9 full octaves
+    note_name_list = []
+    for octave_num in xrange(0, 10):
         
-        
+        for note_num in key_notes:
+            
+            #if the note number is negative we actually want to put this note in the previous octave
+            if(note_num < 0):
+                current_octave = octave_num - 1
+            else:
+                current_octave = octave_num
+                
+            current_note_index = note_num % 12
+            
+            #find out the name for this note
+            
+            #if this note was modified, we want to use its "special" name like a-sharp or w/e
+            if(current_note_index in modified_notes):
+                
+                #this is a modified note, ie on a piano it would probably be a black key (but not always!)
+                #we want to represent the name of the note with "sharp" if this is a sharp key and "flat" if it is a flat key
+                note_name = None
+                for note_name in note_sequence[current_note_index]:
+                    if(note_name.endswith(modified_suffix)):
+                        break
+                    
+                assert note_name is not None, "Note {0} does not have a {1} name, but this is a {1} key".format(current_note_index, modified_suffix)
+                
+            else:
+                #this is not a modified note, ie on a piano it would be a white key, so just use the name that doesn't say "natural" or "flat"
+                note_name = None
+                for note_name in note_sequence[current_note_index]:
+                    if('-' not in note_name):
+                        break
+                    
+                assert note_name is not None, "Note {0} does not have a short name, but it is a non-sharp-or-flat note".format(current_note_index)
+                
+            #we have the note name and octave name! add this note to the note_name_list
+            note_name_list.append('%s%d'%(note_name, current_octave))
+            
+    return note_name_list

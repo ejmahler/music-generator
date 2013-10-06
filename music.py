@@ -42,18 +42,9 @@ def write_music(note_list):
         note_begin = note_spacing * sample_freq * i
         audio_data[note_begin:note_begin + len(note_data)] += note_data
         
-        
-        
-        
-    
-    
-    
     scaled = numpy.int16(audio_data/numpy.max(numpy.abs(audio_data)) * 32767)
     write('test.wav', sample_freq, scaled)
     
-    
-    
-
     
 def create_note_fade():
     pass
@@ -61,21 +52,21 @@ def create_note_fade():
 
 if(__name__ == '__main__'):
     '''write_music([
-        'g-sharp-3','c-sharp-4','e-4',
-        'g-sharp-3','c-sharp-4','e-4',
-        'g-sharp-3','c-sharp-4','e-4',
-        'g-sharp-3','c-sharp-4','e-4',
+        'g-sharp3','c-sharp4','e4',
+        'g-sharp3','c-sharp4','e4',
+        'g-sharp3','c-sharp4','e4',
+        'g-sharp3','c-sharp4','e4',
         
-        'a-3','c-sharp-4','e-4',
-        'a-3','c-sharp-4','e-4',
+        'a3','c-sharp4','e4',
+        'a3','c-sharp4','e4',
         
-        'a-3','d-4','f-sharp-4',
-        'a-3','d-4','f-sharp-4',
+        'a3','d4','f-sharp4',
+        'a3','d4','f-sharp4',
         
-        'g-sharp-3','c-4','f-sharp-4',
-        'g-sharp-3','c-sharp-4','e-4',
-        'g-sharp-3','c-sharp-4','d-sharp-4',
-        'f-sharp-3','c-4','d-sharp-4',
+        'g-sharp3','c4','f-sharp4',
+        'g-sharp3','c-sharp4','e4',
+        'g-sharp3','c-sharp4','d-sharp4',
+        'f-sharp3','c4','d-sharp4',
         ])'''
-    print notes.get_key('a-flat','minor')
+    print notes.get_key('b','major')
     
