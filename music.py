@@ -1,4 +1,5 @@
 import math
+import pprint
 
 import matplotlib.pyplot as plt
 import numpy
@@ -68,5 +69,5 @@ if(__name__ == '__main__'):
         'g-sharp3','c-sharp4','d-sharp4',
         'f-sharp3','c4','d-sharp4',
         ])'''
-    print notes.get_key('b','major')
+    pprint.pprint( notes.get_key('c-sharp','minor'))
     
